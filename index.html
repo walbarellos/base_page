@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Laboratório de Bases Numéricas</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a31;
+      --panel-2: #182242;
+      --text: #eef2ff;
+      --muted: #a8b3cf;
+      --accent: #8ab4ff;
+      --ok: #9be38c;
+      --warn: #ffd166;
+      --danger: #ff8a8a;
+      --border: #2a3766;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #0b1020 0%, #0d1428 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: rgba(18, 26, 49, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .controls { grid-column: span 12; }
+    .result { grid-column: span 12; }
+    .method { grid-column: span 6; }
+    .trainer { grid-column: span 12; }
+    .rules { grid-column: span 12; }
+
+    @media (max-width: 900px) {
+      .method { grid-column: span 12; }
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.7fr 0.8fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    @media (max-width: 720px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input, select, button {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 12px 14px;
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 700;
+      background: linear-gradient(180deg, #2a4ea8 0%, #1e3c84 100%);
+      transition: transform .06s ease, filter .2s ease;
+    }
+
+    button:hover { filter: brightness(1.06); }
+    button:active { transform: translateY(1px); }
+
+    .button-secondary {
+      background: #202e5c;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: #131d39;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin: 6px 6px 0 0;
+    }
+
+    .big {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 800;
+      margin-top: 8px;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .steps {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.7;
+    }
+
+    .steps li { margin-bottom: 8px; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .table th, .table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .table th { color: var(--muted); font-weight: 600; }
+
+    .power-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .power-box {
+      min-width: 76px;
+      background: #101935;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .power-top {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .power-bottom {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: .9rem;
+    }
+
+    .hint, .error {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      background: rgba(155, 227, 140, .08);
+      border: 1px solid rgba(155, 227, 140, .2);
+      color: #dff6d8;
+    }
+
+    .error {
+      background: rgba(255, 138, 138, .08);
+      border: 1px solid rgba(255, 138, 138, .2);
+      color: #ffd6d6;
+    }
+
+    .trainer-box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: end;
+    }
+
+    @media (max-width: 720px) {
+      .trainer-box { grid-template-columns: 1fr; }
+    }
+
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .spacer { height: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Laboratório de Bases Numéricas</h1>
+    <div class="subtitle">
+      Entenda base numérica por <strong>potências da base</strong> e por <strong>divisão sucessiva</strong>. Digite um número decimal, escolha a base e veja as duas explicações lado a lado.
+    </div>
+
+    <div class="grid">
+      <section class="card controls">
+        <div class="row">
+          <div>
+            <label for="decimalInput">Número em base 10</label>
+            <input id="decimalInput" type="number" min="0" step="1" value="40" />
+          </div>
+          <div>
+            <label for="baseSelect">Base de destino</label>
+            <select id="baseSelect">
+              <option value="2">Base 2</option>
+              <option value="3">Base 3</option>
+              <option value="4">Base 4</option>
+              <option value="5">Base 5</option>
+              <option value="6">Base 6</option>
+              <option value="7">Base 7</option>
+              <option value="8">Base 8</option>
+              <option value="9">Base 9</option>
+              <option value="10">Base 10</option>
+            </select>
+          </div>
+          <div>
+            <label for="exampleSelect">Exemplos rápidos</label>
+            <select id="exampleSelect">
+              <option value="40|2">40 → base 2</option>
+              <option value="40|5">40 → base 5</option>
+              <option value="62|5">62 → base 5</option>
+              <option value="47|5">47 → base 5</option>
+              <option value="73|5">73 → base 5</option>
+              <option value="19|5">19 → base 5</option>
+              <option value="40|3">40 → base 3</option>
+              <option value="40|6">40 → base 6</option>
+              <option value="40|9">40 → base 9</option>
+            </select>
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button id="convertBtn">Converter</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <button id="randomBtn" class="button-secondary" type="button">Gerar treino aleatório</button>
+        <div id="message"></div>
+      </section>
+
+      <section class="card result">
+        <div class="pill">Regra mental: <strong>número em base = decomposição em potências da base</strong></div>
+        <div class="pill">Atalho mecânico: <strong>divisões sucessivas</strong></div>
+        <div class="big mono" id="resultLine">40₁₀ = 101000₂</div>
+        <div class="power-strip" id="powerStrip"></div>
+      </section>
+
+      <section class="card method">
+        <h2>1) Método conceitual: potências da base</h2>
+        <div class="muted">Pergunta central: quantas vezes cada potência da base cabe no número?</div>
+        <ol class="steps" id="powersSteps"></ol>
+        <table class="table" id="powersTable"></table>
+      </section>
+
+      <section class="card method">
+        <h2>2) Método mecânico: divisões sucessivas</h2>
+        <div class="muted">Esse método é um atalho para chegar aos mesmos algarismos.</div>
+        <ol class="steps" id="divisionSteps"></ol>
+        <table class="table" id="divisionTable"></table>
+      </section>
+
+      <section class="card trainer">
+        <h2>Treino rápido</h2>
+        <div class="muted">Tente resolver sozinho e depois confira.</div>
+        <div class="trainer-box">
+          <div>
+            <label for="answerInput">Sua resposta na base escolhida</label>
+            <input id="answerInput" type="text" placeholder="Ex.: 222" />
+          </div>
+          <div style="display:flex; gap:12px;">
+            <button id="checkBtn">Conferir</button>
+            <button id="showBtn" class="button-secondary">Mostrar resposta</button>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="mono" id="challengeLine"></div>
+        <div id="feedback"></div>
+      </section>
+
+      <section class="card rules">
+        <h2>Macete universal</h2>
+        <ol class="steps">
+          <li>Escolha a base <span class="mono">b</span>.</li>
+          <li>Liste as potências: <span class="mono">b⁰, b¹, b², ...</span> até a maior que caiba no número.</li>
+          <li>Comece da maior potência e veja quantas vezes ela cabe no valor restante.</li>
+          <li>Esse “quantas vezes” vira o algarismo da casa.</li>
+          <li>Repita com o resto.</li>
+        </ol>
+        <div class="hint">
+          Exemplo mental: em base 5, as casas valem <span class="mono">1, 5, 25, 125...</span>. Então converter 62 para base 5 é perguntar: quantos 25 cabem em 62? Quantos 5 cabem no resto? Quanto sobra para a casa do 1?
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const decimalInput = document.getElementById('decimalInput');
+    const baseSelect = document.getElementById('baseSelect');
+    const exampleSelect = document.getElementById('exampleSelect');
+    const convertBtn = document.getElementById('convertBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const resultLine = document.getElementById('resultLine');
+    const powerStrip = document.getElementById('powerStrip');
+    const powersSteps = document.getElementById('powersSteps');
+    const powersTable = document.getElementById('powersTable');
+    const divisionSteps = document.getElementById('divisionSteps');
+    const divisionTable = document.getElementById('divisionTable');
+    const answerInput = document.getElementById('answerInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const showBtn = document.getElementById('showBtn');
+    const challengeLine = document.getElementById('challengeLine');
+    const feedback = document.getElementById('feedback');
+    const message = document.getElementById('message');
+
+    function toSubscript(n) {
+      const map = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','-':'₋'};
+      return String(n).split('').map(ch => map[ch] || ch).join('');
+    }
+
+    function digitToChar(d) {
+      const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      return chars[d];
+    }
+
+    function convertByDivision(n, base) {
+      if (n === 0) {
+        return {
+          digits: [0],
+          result: '0',
+          steps: ['0 já é 0 em qualquer base.'],
+          rows: [{ current: 0, quotient: 0, remainder: 0 }]
+        };
+      }
+      let current = n;
+      const remainders = [];
+      const rows = [];
+      const steps = [];
+      while (current > 0) {
+        const quotient = Math.floor(current / base);
+        const remainder = current % base;
+        rows.push({ current, quotient, remainder });
+        steps.push(`${current} ÷ ${base} = ${quotient} com resto ${remainder}`);
+        remainders.push(remainder);
+        current = quotient;
+      }
+      const digits = [...remainders].reverse();
+      return {
+        digits,
+        result: digits.map(digitToChar).join(''),
+        steps,
+        rows
+      };
+    }
+
+    function powersFor(n, base) {
+      if (n === 0) return [1];
+      const arr = [];
+      let p = 1;
+      while (p <= n) {
+        arr.push(p);
+        p *= base;
+      }
+      return arr.reverse();
+    }
+
+    function convertByPowers(n, base) {
+      const powers = powersFor(n, base);
+      let remaining = n;
+      const rows = [];
+      const steps = [];
+
+      if (n === 0) {
+        return {
+          digits: [0],
+          result: '0',
+          powers: [1],
+          rows: [{ power: 1, exponent: 0, digit: 0, used: 0, remaining: 0 }],
+          steps: ['0 não precisa de decomposição: resultado 0.']
+        };
+      }
+
+      powers.forEach((power, idx) => {
+        const exponent = powers.length - 1 - idx;
+        const digit = Math.floor(remaining / power);
+        const used = digit * power;
+        const before = remaining;
+        remaining -= used;
+        rows.push({ power, exponent, digit, used, remaining });
+        steps.push(`Casa ${base}^${exponent} = ${power}: cabem ${digit} vez(es) em ${before}; usa ${used} e sobra ${remaining}.`);
+      });
+
+      const digits = rows.map(r => r.digit);
+      return {
+        digits,
+        result: digits.map(digitToChar).join(''),
+        powers,
+        rows,
+        steps
+      };
+    }
+
+    function render() {
+      const n = Number(decimalInput.value);
+      const base = Number(baseSelect.value);
+
+      message.innerHTML = '';
+      feedback.innerHTML = '';
+      answerInput.value = '';
+
+      if (!Number.isInteger(n) || n < 0) {
+        message.innerHTML = '<div class="error">Digite um número inteiro maior ou igual a 0.</div>';
+        return;
+      }
+
+      if (!Number.isInteger(base) || base < 2 || base > 10) {
+        message.innerHTML = '<div class="error">Escolha uma base entre 2 e 10.</div>';
+        return;
+      }
+
+      const division = convertByDivision(n, base);
+      const powers = convertByPowers(n, base);
+
+      resultLine.textContent = `${n}${toSubscript(10)} = ${powers.result}${toSubscript(base)}`;
+      challengeLine.textContent = `Desafio atual: ${n}${toSubscript(10)} = ?${toSubscript(base)}`;
+
+      powerStrip.innerHTML = '';
+      powers.rows.forEach(row => {
+        const box = document.createElement('div');
+        box.className = 'power-box';
+        box.innerHTML = `<div class="power-top">${row.digit}</div><div class="power-bottom">${base}<sup>${row.exponent}</sup> = ${row.power}</div>`;
+        powerStrip.appendChild(box);
+      });
+
+      powersSteps.innerHTML = powers.steps.map(step => `<li>${step}</li>`).join('');
+      powersTable.innerHTML = `
+        <thead>
+          <tr>
+            <th>Casa</th>
+            <th>Valor</th>
+            <th>Algarismo</th>
+            <th>Usado</th>
+            <th>Sobra</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${powers.rows.map(r => `
+            <tr>
+              <td class="mono">${base}<sup>${r.exponent}</sup></td>
+              <td>${r.power}</td>
+              <td><strong>${r.digit}</strong></td>
+              <td>${r.used}</td>
+              <td>${r.remaining}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+
+      divisionSteps.innerHTML = division.steps.map(step => `<li>${step}</li>`).join('') + `<li>Lendo os restos de baixo para cima: <strong class="mono">${division.result}</strong>.</li>`;
+      divisionTable.innerHTML = `
+        <thead>
+          <tr>
+            <th>Atual</th>
+            <th>Quociente</th>
+            <th>Resto</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${division.rows.map(r => `
+            <tr>
+              <td>${r.current}</td>
+              <td>${r.quotient}</td>
+              <td><strong>${r.remainder}</strong></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+
+      showBtn.onclick = () => {
+        feedback.innerHTML = `<div class="hint">Resposta correta: <span class="mono">${powers.result}${toSubscript(base)}</span>.</div>`;
+      };
+
+      checkBtn.onclick = () => {
+        const user = answerInput.value.trim().toUpperCase();
+        if (!user) {
+          feedback.innerHTML = '<div class="error">Digite uma resposta antes de conferir.</div>';
+          return;
+        }
+        if (user === powers.result) {
+          feedback.innerHTML = `<div class="hint"><span class="ok">Acertou.</span> ${n}${toSubscript(10)} = <span class="mono">${powers.result}${toSubscript(base)}</span>.</div>`;
+        } else {
+          feedback.innerHTML = `<div class="error"><span class="warn">Ainda não.</span> Sua resposta foi <span class="mono">${user}${toSubscript(base)}</span>, mas o correto é <span class="mono">${powers.result}${toSubscript(base)}</span>.</div>`;
+        }
+      };
+    }
+
+    convertBtn.addEventListener('click', render);
+
+    exampleSelect.addEventListener('change', () => {
+      const [n, b] = exampleSelect.value.split('|').map(Number);
+      decimalInput.value = n;
+      baseSelect.value = b;
+      render();
+    });
+
+    randomBtn.addEventListener('click', () => {
+      const base = Math.floor(Math.random() * 8) + 2;
+      const n = Math.floor(Math.random() * 150) + 1;
+      decimalInput.value = n;
+      baseSelect.value = base;
+      render();
+    });
+
+    decimalInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') render();
+    });
+    answerInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') checkBtn.click();
+    });
+
+    render();
+  </script>
+</body>
+</html>
