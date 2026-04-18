@@ -222,6 +222,25 @@
     .ok { color: var(--ok); font-weight: 700; }
     .warn { color: var(--warn); font-weight: 700; }
     .spacer { height: 8px; }
+    footer {
+    display: flex;           /* Ativa o Flexbox */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;     /* Centraliza verticalmente */
+    text-align: center;      /* Garante o alinhamento do texto interno */
+    padding: 20px;           /* Espaçamento interno para não ficar colado nas bordas */
+    width: 100%;             /* Garante que ocupe a largura total */
+}
+
+      /* Opcional: remover o estilo padrão do link para ficar mais elegante */
+      footer a {
+          color: #007bff;          /* Cor do link (ajuste ao seu gosto) */
+          text-decoration: none;
+          font-weight: bold;
+      }
+      
+      footer a:hover {
+          text-decoration: underline;
+      }
   </style>
 </head>
 <body>
